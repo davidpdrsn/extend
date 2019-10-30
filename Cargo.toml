@@ -18,8 +18,10 @@ repository = "https://github.com/davidpdrsn/ext.git"
 syn = { version = "1.0.7", features = ["full", "extra-traits"] }
 quote = "1.0.2"
 proc-macro2 = "1.0.6"
-trybuild = "1.0.17"
 proc-macro-error = "0.3.4"
+
+[dev_dependencies]
+trybuild = "1.0.17"
 
 [lib]
 proc-macro = true
