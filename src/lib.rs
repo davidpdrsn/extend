@@ -84,7 +84,7 @@
 //!
 //! [extension traits]: https://dev.to/matsimitsu/extending-existing-functionality-in-rust-with-traits-in-rust-3622
 
-#![doc(html_root_url = "https://docs.rs/extend/0.0.1")]
+#![doc(html_root_url = "https://docs.rs/extend/0.0.2")]
 
 extern crate proc_macro;
 
