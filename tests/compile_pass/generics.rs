@@ -1,4 +1,4 @@
-use ext::ext;
+use extend::ext;
 
 #[ext]
 impl<'a, T: Clone> Vec<&'a T>

@@ -1,5 +1,5 @@
 [package]
-name = "ext"
+name = "extend"
 version = "0.0.1"
 authors = ["David Pedersen <david.pdrsn@gmail.com>"]
 edition = "2018"

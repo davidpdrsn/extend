@@ -1,4 +1,4 @@
-use ext::ext;
+use extend::ext;
 
 #[ext(pub(crate), name = Foo)]
 impl i32 {

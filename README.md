@@ -1,11 +1,11 @@
-# ext
+# extend
 
 Create extensions for types you don't own with [extension traits] but without the boilerplate.
 
 Example:
 
 ```rust
-use ext::ext;
+use extend::ext;
 
 #[ext]
 impl<T: Ord> Vec<T> {
@@ -56,7 +56,7 @@ default is `true`.
 More examples:
 
 ```rust
-use ext::ext;
+use extend::ext;
 
 #[ext(name = SortedVecExt)]
 impl<T: Ord> Vec<T> {
@@ -85,3 +85,5 @@ impl<T> Result<T, std::convert::Infallible> {
 ```
 
 [extension traits]: https://dev.to/matsimitsu/extending-existing-functionality-in-rust-with-traits-in-rust-3622
+
+License: MIT

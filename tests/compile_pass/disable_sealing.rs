@@ -1,4 +1,4 @@
-use ext::ext;
+use extend::ext;
 
 #[ext(name = Foo, sealed = false)]
 impl i32 {

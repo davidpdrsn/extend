@@ -1,5 +1,5 @@
 mod a {
-    use ext::ext;
+    use extend::ext;
 
     #[ext(pub)]
     impl i32 {
