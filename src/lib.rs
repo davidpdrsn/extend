@@ -85,18 +85,27 @@
 //! [extension traits]: https://dev.to/matsimitsu/extending-existing-functionality-in-rust-with-traits-in-rust-3622
 
 #![doc(html_root_url = "https://docs.rs/extend/0.0.2")]
+#![allow(clippy::let_and_return)]
+#![deny(
+    unused_variables,
+    mutable_borrow_reservation_conflict,
+    dead_code,
+    unused_must_use,
+    unused_imports
+)]
 
 extern crate proc_macro;
 
+use proc_macro2::TokenStream;
 use proc_macro_error::*;
-use quote::{format_ident, quote, IdentFragment};
-use std::fmt;
+use quote::{format_ident, quote, ToTokens};
 use syn::{
     parse::{self, Parse, ParseStream},
     parse_macro_input,
     spanned::Spanned,
     token::Semi,
-    Ident, ImplItem, ItemImpl, LitBool, Token, TraitItemMethod, Type, Visibility,
+    Ident, ImplItem, ItemImpl, LitBool, Token, TraitItemMethod, Type, TypeArray, TypeGroup,
+    TypeNever, TypeParen, TypePath, TypePtr, TypeReference, TypeSlice, TypeTuple, Visibility,
 };
 
 /// See crate docs for more info.
@@ -127,9 +136,11 @@ pub fn ext(
         abort!(path.span(), "Trait impls cannot be used for #[ext]");
     }
 
+    let self_ty = parse_self_ty((*self_ty).clone());
+
     let ext_trait_name = config
         .ext_trait_name
-        .unwrap_or_else(|| ext_trait_name(&*self_ty));
+        .unwrap_or_else(|| ext_trait_name(self_ty.clone()));
 
     let trait_methods = items
         .iter()
@@ -192,86 +203,118 @@ pub fn ext(
     code
 }
 
-fn ext_trait_name(self_ty: &Type) -> Ident {
-    fn inner_self_ty(self_ty: &Type) -> Either<Ident, &Ident> {
+#[derive(Debug, Clone)]
+enum ExtType {
+    Array(Box<TypeArray>),
+    Group(TypeGroup),
+    Never(TypeNever),
+    Paren(TypeParen),
+    Path(TypePath),
+    Ptr(TypePtr),
+    Reference(TypeReference),
+    Slice(TypeSlice),
+    Tuple(TypeTuple),
+}
+
+fn parse_self_ty(self_ty: Type) -> ExtType {
+    match self_ty {
+        Type::Array(inner) => ExtType::Array(Box::new(inner)),
+        Type::Group(inner) => ExtType::Group(inner),
+        Type::Never(inner) => ExtType::Never(inner),
+        Type::Paren(inner) => ExtType::Paren(inner),
+        Type::Path(inner) => ExtType::Path(inner),
+        Type::Ptr(inner) => ExtType::Ptr(inner),
+        Type::Reference(inner) => ExtType::Reference(inner),
+        Type::Slice(inner) => ExtType::Slice(inner),
+        Type::Tuple(inner) => ExtType::Tuple(inner),
+
+        Type::BareFn(_)
+        | Type::ImplTrait(_)
+        | Type::Infer(_)
+        | Type::Macro(_)
+        | Type::Verbatim(_)
+        | Type::TraitObject(_)
+        | _ => abort!(
+            self_ty.span(),
+            "#[ext] is not supported for this kind of type"
+        ),
+    }
+}
+
+impl<'a> From<&'a Type> for ExtType {
+    fn from(inner: &'a Type) -> ExtType {
+        parse_self_ty(inner.clone())
+    }
+}
+
+impl From<Box<Type>> for ExtType {
+    fn from(inner: Box<Type>) -> ExtType {
+        parse_self_ty((*inner).clone())
+    }
+}
+
+impl ToTokens for ExtType {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        match self {
+            ExtType::Array(inner) => inner.to_tokens(tokens),
+            ExtType::Group(inner) => inner.to_tokens(tokens),
+            ExtType::Never(inner) => inner.to_tokens(tokens),
+            ExtType::Paren(inner) => inner.to_tokens(tokens),
+            ExtType::Path(inner) => inner.to_tokens(tokens),
+            ExtType::Ptr(inner) => inner.to_tokens(tokens),
+            ExtType::Reference(inner) => inner.to_tokens(tokens),
+            ExtType::Slice(inner) => inner.to_tokens(tokens),
+            ExtType::Tuple(inner) => inner.to_tokens(tokens),
+        }
+    }
+}
+
+fn ext_trait_name(self_ty: ExtType) -> Ident {
+    fn inner_self_ty(self_ty: ExtType) -> Ident {
         match self_ty {
-            Type::Path(inner) => Either::B(
-                &inner
-                    .path
-                    .segments
-                    .last()
-                    .unwrap_or_else(|| abort!(inner.span(), "Empty type path"))
-                    .ident,
-            ),
-            Type::Reference(inner) => {
-                let name = inner_self_ty(&inner.elem);
-                Either::A(format_ident!("Ref{}", name))
+            ExtType::Path(inner) => inner
+                .path
+                .segments
+                .last()
+                .unwrap_or_else(|| abort!(inner.span(), "Empty type path"))
+                .ident
+                .clone(),
+            ExtType::Reference(inner) => {
+                let name = inner_self_ty(inner.elem.into());
+                format_ident!("Ref{}", name)
             }
-            Type::Array(inner) => {
-                let name = inner_self_ty(&inner.elem);
-                Either::A(format_ident!("ListOf{}", name))
+            ExtType::Array(inner) => {
+                let name = inner_self_ty(inner.elem.into());
+                format_ident!("ListOf{}", name)
             }
-            Type::Group(inner) => {
-                let name = inner_self_ty(&inner.elem);
-                Either::A(format_ident!("Group{}", name))
+            ExtType::Group(inner) => {
+                let name = inner_self_ty(inner.elem.into());
+                format_ident!("Group{}", name)
             }
-            Type::Paren(inner) => {
-                let name = inner_self_ty(&inner.elem);
-                Either::A(format_ident!("Paren{}", name))
+            ExtType::Paren(inner) => {
+                let name = inner_self_ty(inner.elem.into());
+                format_ident!("Paren{}", name)
             }
-            Type::Ptr(inner) => {
-                let name = inner_self_ty(&inner.elem);
-                Either::A(format_ident!("PointerTo{}", name))
+            ExtType::Ptr(inner) => {
+                let name = inner_self_ty(inner.elem.into());
+                format_ident!("PointerTo{}", name)
             }
-            Type::Slice(inner) => {
-                let name = inner_self_ty(&inner.elem);
-                Either::A(format_ident!("SliceOf{}", name))
+            ExtType::Slice(inner) => {
+                let name = inner_self_ty(inner.elem.into());
+                format_ident!("SliceOf{}", name)
             }
-            Type::Tuple(inner) => {
+            ExtType::Tuple(inner) => {
                 let mut name = format_ident!("TupleOf");
                 for elem in &inner.elems {
-                    name = format_ident!("{}{}", name, inner_self_ty(elem));
+                    name = format_ident!("{}{}", name, inner_self_ty(elem.into()));
                 }
-                Either::A(name)
+                name
             }
-            Type::Never(_) => Either::A(format_ident!("Never")),
-            Type::BareFn(_)
-            | Type::ImplTrait(_)
-            | Type::Infer(_)
-            | Type::Macro(_)
-            | Type::Verbatim(_)
-            | Type::TraitObject(_)
-            | _ => abort!(
-                self_ty.span(),
-                "#[ext] is not supported for this kind of type"
-            ),
+            ExtType::Never(_) => format_ident!("Never"),
         }
     }
 
     format_ident!("{}Ext", inner_self_ty(self_ty))
-}
-
-enum Either<A, B> {
-    A(A),
-    B(B),
-}
-
-impl<A: IdentFragment, B: IdentFragment> quote::IdentFragment for Either<A, B> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Either::A(x) => x.fmt(f),
-            Either::B(x) => x.fmt(f),
-        }
-    }
-}
-
-impl<A: Spanned, B: Spanned> Spanned for Either<A, B> {
-    fn span(&self) -> proc_macro2::Span {
-        match self {
-            Either::A(x) => x.span(),
-            Either::B(x) => x.span(),
-        }
-    }
 }
 
 fn trait_method(item: &ImplItem) -> TraitItemMethod {
