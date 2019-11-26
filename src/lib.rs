@@ -136,11 +136,11 @@ pub fn ext(
         abort!(path.span(), "Trait impls cannot be used for #[ext]");
     }
 
-    let self_ty = parse_self_ty((*self_ty).clone());
+    let self_ty = parse_self_ty(&self_ty);
 
     let ext_trait_name = config
         .ext_trait_name
-        .unwrap_or_else(|| ext_trait_name(self_ty.clone()));
+        .unwrap_or_else(|| ext_trait_name(&self_ty));
 
     let trait_methods = items
         .iter()
@@ -204,21 +204,21 @@ pub fn ext(
 }
 
 #[derive(Debug, Clone)]
-enum ExtType {
-    Array(Box<TypeArray>),
-    Group(TypeGroup),
-    Never(TypeNever),
-    Paren(TypeParen),
-    Path(TypePath),
-    Ptr(TypePtr),
-    Reference(TypeReference),
-    Slice(TypeSlice),
-    Tuple(TypeTuple),
+enum ExtType<'a> {
+    Array(&'a TypeArray),
+    Group(&'a TypeGroup),
+    Never(&'a TypeNever),
+    Paren(&'a TypeParen),
+    Path(&'a TypePath),
+    Ptr(&'a TypePtr),
+    Reference(&'a TypeReference),
+    Slice(&'a TypeSlice),
+    Tuple(&'a TypeTuple),
 }
 
-fn parse_self_ty(self_ty: Type) -> ExtType {
+fn parse_self_ty(self_ty: &Type) -> ExtType {
     match self_ty {
-        Type::Array(inner) => ExtType::Array(Box::new(inner)),
+        Type::Array(inner) => ExtType::Array(inner),
         Type::Group(inner) => ExtType::Group(inner),
         Type::Never(inner) => ExtType::Never(inner),
         Type::Paren(inner) => ExtType::Paren(inner),
@@ -241,19 +241,13 @@ fn parse_self_ty(self_ty: Type) -> ExtType {
     }
 }
 
-impl<'a> From<&'a Type> for ExtType {
-    fn from(inner: &'a Type) -> ExtType {
-        parse_self_ty(inner.clone())
+impl<'a> From<&'a Type> for ExtType<'a> {
+    fn from(inner: &'a Type) -> ExtType<'a> {
+        parse_self_ty(inner)
     }
 }
 
-impl From<Box<Type>> for ExtType {
-    fn from(inner: Box<Type>) -> ExtType {
-        parse_self_ty((*inner).clone())
-    }
-}
-
-impl ToTokens for ExtType {
+impl<'a> ToTokens for ExtType<'a> {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         match self {
             ExtType::Array(inner) => inner.to_tokens(tokens),
@@ -269,8 +263,8 @@ impl ToTokens for ExtType {
     }
 }
 
-fn ext_trait_name(self_ty: ExtType) -> Ident {
-    fn inner_self_ty(self_ty: ExtType) -> Ident {
+fn ext_trait_name(self_ty: &ExtType) -> Ident {
+    fn inner_self_ty(self_ty: &ExtType) -> Ident {
         match self_ty {
             ExtType::Path(inner) => inner
                 .path
@@ -280,33 +274,33 @@ fn ext_trait_name(self_ty: ExtType) -> Ident {
                 .ident
                 .clone(),
             ExtType::Reference(inner) => {
-                let name = inner_self_ty(inner.elem.into());
+                let name = inner_self_ty(&(&*inner.elem).into());
                 format_ident!("Ref{}", name)
             }
             ExtType::Array(inner) => {
-                let name = inner_self_ty(inner.elem.into());
+                let name = inner_self_ty(&(&*inner.elem).into());
                 format_ident!("ListOf{}", name)
             }
             ExtType::Group(inner) => {
-                let name = inner_self_ty(inner.elem.into());
+                let name = inner_self_ty(&(&*inner.elem).into());
                 format_ident!("Group{}", name)
             }
             ExtType::Paren(inner) => {
-                let name = inner_self_ty(inner.elem.into());
+                let name = inner_self_ty(&(&*inner.elem).into());
                 format_ident!("Paren{}", name)
             }
             ExtType::Ptr(inner) => {
-                let name = inner_self_ty(inner.elem.into());
+                let name = inner_self_ty(&(&*inner.elem).into());
                 format_ident!("PointerTo{}", name)
             }
             ExtType::Slice(inner) => {
-                let name = inner_self_ty(inner.elem.into());
+                let name = inner_self_ty(&(&*inner.elem).into());
                 format_ident!("SliceOf{}", name)
             }
             ExtType::Tuple(inner) => {
                 let mut name = format_ident!("TupleOf");
                 for elem in &inner.elems {
-                    name = format_ident!("{}{}", name, inner_self_ty(elem.into()));
+                    name = format_ident!("{}{}", name, inner_self_ty(&elem.into()));
                 }
                 name
             }
