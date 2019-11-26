@@ -6,15 +6,23 @@ for Rust libraries in [RFC #1105](https://github.com/rust-lang/rfcs/blob/master/
 
 ## Unreleased
 
+None.
+
+### Breaking changes
+
+None.
+
+## [0.1.0]
+
 - Support adding extensions to the ["never type"](https://doc.rust-lang.org/std/primitive.never.html).
 
 ### Breaking changes
 
 - Simplify names of traits generates for complex types.
 
-## [0.0.3]
+## [0.0.2]
 
-Release before change log was kept so don't remember what the changes were.
+- Move "trybuild" to dev-dependency.
 
 ## [0.0.1]
 

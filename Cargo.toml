@@ -1,6 +1,6 @@
 [package]
 name = "extend"
-version = "0.0.2"
+version = "0.1.0"
 authors = ["David Pedersen <david.pdrsn@gmail.com>"]
 edition = "2018"
 categories = ["rust-patterns"]
@@ -15,7 +15,7 @@ repository = "https://github.com/davidpdrsn/ext.git"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-syn = { version = "1.0.7", features = ["full", "extra-traits", "printing"] }
+syn = { version = "1.0.7", features = ["full", "extra-traits"] }
 quote = "1.0.2"
 proc-macro2 = "1.0.6"
 proc-macro-error = "0.3.4"
