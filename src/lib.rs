@@ -234,11 +234,11 @@ fn ext_trait_name(self_ty: &Type) -> Ident {
                 }
                 Either::A(name)
             }
+            Type::Never(_) => Either::A(format_ident!("Never")),
             Type::BareFn(_)
             | Type::ImplTrait(_)
             | Type::Infer(_)
             | Type::Macro(_)
-            | Type::Never(_)
             | Type::Verbatim(_)
             | Type::TraitObject(_)
             | _ => abort!(
