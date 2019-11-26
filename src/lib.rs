@@ -28,7 +28,7 @@
 //!
 //! ```rust
 //! trait VecExt<T: Ord> {
-//!     fn sorted(mut self) -> Self;
+//!     fn sorted(self) -> Self;
 //! }
 //!
 //! impl<T: Ord> VecExt<T> for Vec<T> {
