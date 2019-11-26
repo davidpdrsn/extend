@@ -193,59 +193,62 @@ pub fn ext(
 }
 
 fn ext_trait_name(self_ty: &Type) -> Ident {
-    let inner_self_ty = match self_ty {
-        Type::Path(inner) => Either::B(
-            &inner
-                .path
-                .segments
-                .last()
-                .unwrap_or_else(|| abort!(inner.span(), "Empty type path"))
-                .ident,
-        ),
-        Type::Reference(inner) => {
-            let name = ext_trait_name(&inner.elem);
-            Either::A(format_ident!("Ref{}", name))
-        }
-        Type::Array(inner) => {
-            let name = ext_trait_name(&inner.elem);
-            Either::A(format_ident!("ListOf{}", name))
-        }
-        Type::Group(inner) => {
-            let name = ext_trait_name(&inner.elem);
-            Either::A(format_ident!("Group{}", name))
-        }
-        Type::Paren(inner) => {
-            let name = ext_trait_name(&inner.elem);
-            Either::A(format_ident!("Paren{}", name))
-        }
-        Type::Ptr(inner) => {
-            let name = ext_trait_name(&inner.elem);
-            Either::A(format_ident!("PointerTo{}", name))
-        }
-        Type::Slice(inner) => {
-            let name = ext_trait_name(&inner.elem);
-            Either::A(format_ident!("SliceOf{}", name))
-        }
-        Type::Tuple(inner) => {
-            let mut name = format_ident!("TupleOf");
-            for elem in &inner.elems {
-                name = format_ident!("{}{}", name, ext_trait_name(elem));
+    fn inner_self_ty(self_ty: &Type) -> Either<Ident, &Ident> {
+        match self_ty {
+            Type::Path(inner) => Either::B(
+                &inner
+                    .path
+                    .segments
+                    .last()
+                    .unwrap_or_else(|| abort!(inner.span(), "Empty type path"))
+                    .ident,
+            ),
+            Type::Reference(inner) => {
+                let name = inner_self_ty(&inner.elem);
+                Either::A(format_ident!("Ref{}", name))
             }
-            Either::A(name)
+            Type::Array(inner) => {
+                let name = inner_self_ty(&inner.elem);
+                Either::A(format_ident!("ListOf{}", name))
+            }
+            Type::Group(inner) => {
+                let name = inner_self_ty(&inner.elem);
+                Either::A(format_ident!("Group{}", name))
+            }
+            Type::Paren(inner) => {
+                let name = inner_self_ty(&inner.elem);
+                Either::A(format_ident!("Paren{}", name))
+            }
+            Type::Ptr(inner) => {
+                let name = inner_self_ty(&inner.elem);
+                Either::A(format_ident!("PointerTo{}", name))
+            }
+            Type::Slice(inner) => {
+                let name = inner_self_ty(&inner.elem);
+                Either::A(format_ident!("SliceOf{}", name))
+            }
+            Type::Tuple(inner) => {
+                let mut name = format_ident!("TupleOf");
+                for elem in &inner.elems {
+                    name = format_ident!("{}{}", name, inner_self_ty(elem));
+                }
+                Either::A(name)
+            }
+            Type::BareFn(_)
+            | Type::ImplTrait(_)
+            | Type::Infer(_)
+            | Type::Macro(_)
+            | Type::Never(_)
+            | Type::Verbatim(_)
+            | Type::TraitObject(_)
+            | _ => abort!(
+                self_ty.span(),
+                "#[ext] is not supported for this kind of type"
+            ),
         }
-        Type::BareFn(_)
-        | Type::ImplTrait(_)
-        | Type::Infer(_)
-        | Type::Macro(_)
-        | Type::Never(_)
-        | Type::Verbatim(_)
-        | Type::TraitObject(_)
-        | _ => abort!(
-            self_ty.span(),
-            "#[ext] is not supported for this kind of type"
-        ),
-    };
-    format_ident!("{}Ext", inner_self_ty)
+    }
+
+    format_ident!("{}Ext", inner_self_ty(self_ty))
 }
 
 enum Either<A, B> {
