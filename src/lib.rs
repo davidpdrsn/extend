@@ -172,7 +172,11 @@ pub fn ext(
         #unsafety
         trait #ext_trait_name #impl_generics #sealed_super_trait #where_clause {
             #(
-                #[allow(patterns_in_fns_without_body)]
+                #[allow(
+                    patterns_in_fns_without_body,
+                    clippy::inline_fn_without_body,
+                    unused_attributes
+                )]
                 #trait_methods
             )*
         }
