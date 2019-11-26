@@ -89,21 +89,15 @@
 extern crate proc_macro;
 
 use proc_macro_error::*;
-use quote::IdentFragment;
-use quote::{format_ident, quote};
-use syn::parse::Parse;
-use syn::parse::{self, ParseStream};
-use syn::parse_macro_input;
-use syn::spanned::Spanned;
-use syn::token::Semi;
-use syn::Ident;
-use syn::ImplItem;
-use syn::ItemImpl;
-use syn::LitBool;
-use syn::Token;
-use syn::TraitItemMethod;
-use syn::Type;
-use syn::Visibility;
+use quote::{format_ident, quote, IdentFragment};
+use std::fmt;
+use syn::{
+    parse::{self, Parse, ParseStream},
+    parse_macro_input,
+    spanned::Spanned,
+    token::Semi,
+    Ident, ImplItem, ItemImpl, LitBool, Token, TraitItemMethod, Type, Visibility,
+};
 
 /// See crate docs for more info.
 #[proc_macro_attribute]
@@ -254,8 +248,6 @@ enum Either<A, B> {
     A(A),
     B(B),
 }
-
-use std::fmt;
 
 impl<A: IdentFragment, B: IdentFragment> quote::IdentFragment for Either<A, B> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
