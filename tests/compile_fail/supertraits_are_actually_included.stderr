@@ -1,0 +1,5 @@
+error[E0277]: the trait bound `std::string::String: MyTrait` is not satisfied
+ --> $DIR/supertraits_are_actually_included.rs:6:6
+  |
+6 | impl String {
+  |      ^^^^^^ the trait `MyTrait` is not implemented for `std::string::String`
