@@ -12,7 +12,11 @@ None.
 
 None.
 
-## [0.1.0]
+## 0.1.1 - 2020-02-22
+
+- Add support for specifying supertraits of the generated trait [#4](https://github.com/davidpdrsn/extend/pull/4).
+
+## 0.1.0
 
 - Support adding extensions to the ["never type"](https://doc.rust-lang.org/std/primitive.never.html).
 
@@ -20,10 +24,10 @@ None.
 
 - Simplify names of traits generates for complex types.
 
-## [0.0.2]
+## 0.0.2
 
 - Move "trybuild" to dev-dependency.
 
-## [0.0.1]
+## 0.0.1
 
 Initial release.
