@@ -15,9 +15,9 @@ repository = "https://github.com/davidpdrsn/ext.git"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-syn = { version = "1.0.7", features = ["full", "extra-traits"] }
-quote = "1.0.2"
-proc-macro2 = "1.0.6"
+syn = { version = "1", features = ["full", "extra-traits"] }
+quote = "1"
+proc-macro2 = "1"
 proc-macro-error = "1"
 
 [dev_dependencies]
