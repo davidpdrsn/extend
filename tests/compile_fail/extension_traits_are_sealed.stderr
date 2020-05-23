@@ -1,5 +1,0 @@
-error[E0277]: the trait bound `i64: private_Foo::Sealed` is not satisfied
- --> $DIR/extension_traits_are_sealed.rs:8:6
-  |
-8 | impl Foo for i64 {
-  |      ^^^ the trait `private_Foo::Sealed` is not implemented for `i64`

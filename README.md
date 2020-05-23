@@ -30,7 +30,7 @@ type you specify. The code shown above expands roughly to:
 
 ```rust
 trait VecExt<T: Ord> {
-    fn sorted(mut self) -> Self;
+    fn sorted(self) -> Self;
 }
 
 impl<T: Ord> VecExt<T> for Vec<T> {
@@ -48,10 +48,8 @@ You can configure:
 - The visibility of the trait. The default visibility is private. Example: `#[ext(pub)]`. This
 must be the first argument to the attribute
 - The name of the generated extension trait. Example: `#[ext(name = MyExt)]`.
-- Whether or not the generated trait should be [sealed]. Example: `#[ext(sealed = false)]`. The
-default is `true`.
-
-[sealed]: https://rust-lang.github.io/api-guidelines/future-proofing.html#sealed-traits-protect-against-downstream-implementations-c-sealed
+- Which supertraits the generated extension trait should have. Default is no supertraits.
+Example: `#[ext(supertraits = Default + Clone)]`.
 
 More examples:
 
@@ -80,6 +78,13 @@ impl<T> Result<T, std::convert::Infallible> {
             Ok(t) => t,
             Err(_) => unreachable!(),
         }
+    }
+}
+
+#[ext(supertraits = Default + Clone)]
+impl String {
+    fn my_length(self) -> usize {
+        self.len()
     }
 }
 ```

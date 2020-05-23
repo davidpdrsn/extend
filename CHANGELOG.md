@@ -10,7 +10,7 @@ None.
 
 ### Breaking changes
 
-None.
+- Generated traits are no longer sealed and the `sealed` argument previously supported by `#[ext]` has been removed. Making the traits sealed lead to lots of complexity that we doesn't provide much value.
 
 ## 0.1.1 - 2020-02-22
 
