@@ -6,6 +6,14 @@ for Rust libraries in [RFC #1105](https://github.com/rust-lang/rfcs/blob/master/
 
 ## Unreleased
 
+None.
+
+### Breaking changes
+
+None.
+
+## 0.2.0 - 2020-08-29
+
 - Handle unnamed extensions on the same generic type with different type parameters. For example `Option<i32>` and `Option<String>`. Previously we would generate the same name of both hidden traits which wouldn't compile.
 - Support associated constants in extension impls.
 
