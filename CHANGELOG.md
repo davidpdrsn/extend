@@ -12,6 +12,11 @@ None.
 
 None.
 
+## 0.2.1 - 2020-08-29
+
+- Fix documentation link in Cargo.toml.
+- Use more correct repository URL in Cargo.toml.
+
 ## 0.2.0 - 2020-08-29
 
 - Handle unnamed extensions on the same generic type with different type parameters. For example `Option<i32>` and `Option<String>`. Previously we would generate the same name of both hidden traits which wouldn't compile.
