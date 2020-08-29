@@ -208,6 +208,7 @@ enum ExtType<'a> {
     Tuple(&'a TypeTuple),
 }
 
+#[allow(clippy::wildcard_in_or_patterns)]
 fn parse_self_ty(self_ty: &Type) -> ExtType {
     match self_ty {
         Type::Array(inner) => ExtType::Array(inner),
