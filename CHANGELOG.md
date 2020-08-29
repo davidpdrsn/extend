@@ -6,11 +6,11 @@ for Rust libraries in [RFC #1105](https://github.com/rust-lang/rfcs/blob/master/
 
 ## Unreleased
 
-None.
+- Handle unnamed extensions on the same generic type with different type parameters. For example `Option<i32>` and `Option<String>`. Previously we would generate the same name of both hidden traits which wouldn't compile.
 
 ### Breaking changes
 
-- Generated traits are no longer sealed and the `sealed` argument previously supported by `#[ext]` has been removed. Making the traits sealed lead to lots of complexity that we doesn't provide much value.
+- Generated traits are no longer sealed and the `sealed` argument previously supported by `#[ext]` has been removed. Making the traits sealed lead to lots of complexity that we didn't think brought much value.
 
 ## 0.1.1 - 2020-02-22
 

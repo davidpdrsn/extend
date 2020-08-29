@@ -259,13 +259,7 @@ impl<'a> ToTokens for ExtType<'a> {
 fn ext_trait_name(self_ty: &ExtType) -> Ident {
     fn inner_self_ty(self_ty: &ExtType) -> Ident {
         match self_ty {
-            ExtType::Path(inner) => inner
-                .path
-                .segments
-                .last()
-                .unwrap_or_else(|| abort!(inner.span(), "Empty type path"))
-                .ident
-                .clone(),
+            ExtType::Path(inner) => find_and_combine_idents(inner),
             ExtType::Reference(inner) => {
                 let name = inner_self_ty(&(&*inner.elem).into());
                 format_ident!("Ref{}", name)
@@ -302,6 +296,36 @@ fn ext_trait_name(self_ty: &ExtType) -> Ident {
     }
 
     format_ident!("{}Ext", inner_self_ty(self_ty))
+}
+
+fn find_and_combine_idents(type_path: &TypePath) -> Ident {
+    use syn::visit::{self, Visit};
+
+    struct IdentVisitor<'a>(Vec<&'a Ident>);
+
+    impl<'a> Visit<'a> for IdentVisitor<'a> {
+        fn visit_ident(&mut self, i: &'a Ident) {
+            self.0.push(i);
+        }
+    }
+
+    let mut visitor = IdentVisitor(Vec::new());
+    visit::visit_type_path(&mut visitor, type_path);
+    let idents = visitor.0;
+
+    if idents.is_empty() {
+        abort!(type_path.span(), "Empty type path")
+    } else {
+        let start = &idents[0].span();
+        let combined_span = idents
+            .iter()
+            .map(|i| i.span())
+            .fold(*start, |a, b| a.join(b).unwrap_or(a));
+
+        let combined_name = idents.iter().map(|i| i.to_string()).collect::<String>();
+
+        Ident::new(&combined_name, combined_span)
+    }
 }
 
 fn trait_method(item: &ImplItem) -> TraitItemMethod {
