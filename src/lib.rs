@@ -110,8 +110,9 @@ use syn::{
     punctuated::Punctuated,
     spanned::Spanned,
     token::{Add, Semi},
-    Ident, ImplItem, ItemImpl, Token, TraitItemMethod, Type, TypeArray, TypeGroup, TypeNever,
-    TypeParamBound, TypeParen, TypePath, TypePtr, TypeReference, TypeSlice, TypeTuple, Visibility,
+    Ident, ImplItem, ItemImpl, Token, TraitItemConst, TraitItemMethod, Type, TypeArray, TypeGroup,
+    TypeNever, TypeParamBound, TypeParen, TypePath, TypePtr, TypeReference, TypeSlice, TypeTuple,
+    Visibility,
 };
 
 /// See crate docs for more info.
@@ -148,10 +149,10 @@ pub fn ext(
         .ext_trait_name
         .unwrap_or_else(|| ext_trait_name(&self_ty));
 
-    let trait_methods = items
-        .iter()
-        .map(|item| trait_method(item))
-        .collect::<Vec<_>>();
+    let MethodsAndConsts {
+        trait_methods,
+        trait_consts,
+    } = extract_allowed_items(&items);
 
     let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
 
@@ -176,6 +177,10 @@ pub fn ext(
         #visibility
         #unsafety
         trait #ext_trait_name #impl_generics #supertraits_quoted #where_clause {
+            #(
+                #trait_consts
+            )*
+
             #(
                 #[allow(
                     patterns_in_fns_without_body,
@@ -328,18 +333,41 @@ fn find_and_combine_idents(type_path: &TypePath) -> Ident {
     }
 }
 
-fn trait_method(item: &ImplItem) -> TraitItemMethod {
-    let method = match item {
-        ImplItem::Method(method) => method,
-        _ => abort!(item.span(), "Only methods are allowed in #[ext] impls"),
-    };
+#[derive(Debug, Default)]
+struct MethodsAndConsts {
+    trait_methods: Vec<TraitItemMethod>,
+    trait_consts: Vec<TraitItemConst>,
+}
 
-    TraitItemMethod {
-        attrs: method.attrs.clone(),
-        sig: method.sig.clone(),
-        default: None,
-        semi_token: Some(Semi::default()),
+#[allow(clippy::wildcard_in_or_patterns)]
+fn extract_allowed_items(items: &[ImplItem]) -> MethodsAndConsts {
+    let mut acc = MethodsAndConsts::default();
+    for item in items {
+        match item {
+            ImplItem::Method(method) => acc.trait_methods.push(TraitItemMethod {
+                attrs: method.attrs.clone(),
+                sig: method.sig.clone(),
+                default: None,
+                semi_token: Some(Semi::default()),
+            }),
+            ImplItem::Const(const_) => acc.trait_consts.push(TraitItemConst {
+                attrs: const_.attrs.clone(),
+                const_token: Default::default(),
+                ident: const_.ident.clone(),
+                colon_token: Default::default(),
+                ty: const_.ty.clone(),
+                default: None,
+                semi_token: Default::default(),
+            }),
+            ImplItem::Type(_) => abort!(
+                item.span(),
+                "Associated types are not allowed in #[ext] impls"
+            ),
+            ImplItem::Macro(_) => abort!(item.span(), "Macros are not allowed in #[ext] impls"),
+            ImplItem::Verbatim(_) | _ => abort!(item.span(), "Not allowed in #[ext] impls"),
+        }
     }
+    acc
 }
 
 #[derive(Debug)]
