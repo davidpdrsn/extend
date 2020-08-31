@@ -20,6 +20,7 @@ proc-macro-error = "1"
 
 [dev_dependencies]
 trybuild = "1.0.17"
+async-trait = "0.1.40"
 
 [lib]
 proc-macro = true

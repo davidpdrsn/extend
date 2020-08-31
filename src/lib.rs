@@ -106,6 +106,35 @@
 //! }
 //! ```
 //!
+//! # async-trait compatibility
+//!
+//! Async extensions are supported via [async-trait](https://crates.io/crates/async-trait).
+//!
+//! Be aware that you need to add `#[async_trait]` _below_ `#[ext]`. Otherwise the `ext` macro
+//! cannot see the `#[async_trait]` attribute and pass it along in the generated code.
+//!
+//! Example:
+//!
+//! ```
+//! use extend::ext;
+//! use async_trait::async_trait;
+//!
+//! #[ext]
+//! #[async_trait]
+//! impl String {
+//!     async fn read_file() -> String {
+//!         // ...
+//!         # todo!()
+//!     }
+//! }
+//! ```
+//!
+//! # Other attributes
+//!
+//! Other attributes provided _below_ `#[ext]` will be passed along to both the generated trait and
+//! the implementation. See [async-trait compatibility](#async-trait-compatibility) above for an
+//! example.
+//!
 //! [extension traits]: https://dev.to/matsimitsu/extending-existing-functionality-in-rust-with-traits-in-rust-3622
 
 #![doc(html_root_url = "https://docs.rs/extend/0.2.1")]
@@ -210,6 +239,7 @@ pub fn ext(
             )*
         }
 
+        #(#attrs)*
         impl #impl_generics #ext_trait_name #ty_generics for #self_ty #where_clause {
             #(#items)*
         }
