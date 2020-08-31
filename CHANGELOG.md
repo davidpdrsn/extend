@@ -6,11 +6,11 @@ for Rust libraries in [RFC #1105](https://github.com/rust-lang/rfcs/blob/master/
 
 ## Unreleased
 
-None.
+- Add async-trait compatibility.
 
 ### Breaking changes
 
-None.
+- Other attributes put on the `impl` would previously only be included on the generated trait. They're now included on both the trait and the implementation.
 
 ## 0.2.1 - 2020-08-29
 
