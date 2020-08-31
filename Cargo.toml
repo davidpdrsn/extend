@@ -1,11 +1,11 @@
 [package]
 name = "extend"
-version = "0.2.1"
+version = "0.3.0"
 authors = ["David Pedersen <david.pdrsn@gmail.com>"]
 edition = "2018"
 categories = ["rust-patterns"]
 description = "Create extensions for types you don't own with extension traits but without the boilerplate."
-homepage = "https://github.com/davidpdrsn/ext"
+homepage = "https://github.com/davidpdrsn/extend"
 documentation = "https://docs.rs/extend"
 keywords = ["extension", "trait"]
 license = "MIT"

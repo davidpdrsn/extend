@@ -6,6 +6,14 @@ for Rust libraries in [RFC #1105](https://github.com/rust-lang/rfcs/blob/master/
 
 ## Unreleased
 
+None.
+
+### Breaking changes
+
+None.
+
+## 0.3.0 - 2020-08-31
+
 - Add async-trait compatibility.
 
 ### Breaking changes

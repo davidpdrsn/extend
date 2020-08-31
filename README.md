@@ -1,6 +1,6 @@
 # extend
 
-[API documentation](https://docs.rs/extend/0.2.1/extend/)
+[API documentation](https://docs.rs/extend)
 
 Create extensions for types you don't own with [extension traits] but without the boilerplate.
 
