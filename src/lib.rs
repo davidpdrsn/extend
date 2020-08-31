@@ -39,13 +39,32 @@
 //! }
 //! ```
 //!
+//! # Supported items
+//!
+//! Extensions can contain methods or associated constants:
+//!
+//! ```rust
+//! use extend::ext;
+//!
+//! #[ext]
+//! impl String {
+//!     const CONSTANT: &'static str = "FOO";
+//!
+//!     fn method() {
+//!         // ...
+//!         # todo!()
+//!     }
+//! }
+//! ```
+//!
 //! # Configuration
 //!
 //! You can configure:
 //!
 //! - The visibility of the trait. The default visibility is private. Example: `#[ext(pub)]`. This
-//! must be the first argument to the attribute
-//! - The name of the generated extension trait. Example: `#[ext(name = MyExt)]`.
+//! must be the first argument to the attribute.
+//! - The name of the generated extension trait. Example: `#[ext(name = MyExt)]`. By default we
+//! generate a name based on what you extend.
 //! - Which supertraits the generated extension trait should have. Default is no supertraits.
 //! Example: `#[ext(supertraits = Default + Clone)]`.
 //!
