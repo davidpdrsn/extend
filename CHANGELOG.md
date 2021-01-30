@@ -7,6 +7,7 @@ for Rust libraries in [RFC #1105](https://github.com/rust-lang/rfcs/blob/master/
 ## Unreleased
 
 - Support extensions on bare functions types (things like `fn(i32) -> bool`).
+- Support extensions on trait objects (things like `dyn Send + Sync`).
 
 ### Breaking changes
 

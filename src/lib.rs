@@ -160,7 +160,7 @@ use syn::{
     token::{Add, Semi},
     Ident, ImplItem, ItemImpl, Token, TraitItemConst, TraitItemMethod, Type, TypeArray, TypeBareFn,
     TypeGroup, TypeNever, TypeParamBound, TypeParen, TypePath, TypePtr, TypeReference, TypeSlice,
-    TypeTuple, Visibility,
+    TypeTraitObject, TypeTuple, Visibility,
 };
 
 /// See crate docs for more info.
@@ -261,6 +261,7 @@ enum ExtType<'a> {
     Slice(&'a TypeSlice),
     Tuple(&'a TypeTuple),
     BareFn(&'a TypeBareFn),
+    TraitObject(&'a TypeTraitObject),
 }
 
 #[allow(clippy::wildcard_in_or_patterns)]
@@ -276,13 +277,9 @@ fn parse_self_ty(self_ty: &Type) -> ExtType {
         Type::Slice(inner) => ExtType::Slice(inner),
         Type::Tuple(inner) => ExtType::Tuple(inner),
         Type::BareFn(inner) => ExtType::BareFn(inner),
+        Type::TraitObject(inner) => ExtType::TraitObject(inner),
 
-        Type::ImplTrait(_)
-        | Type::Infer(_)
-        | Type::Macro(_)
-        | Type::Verbatim(_)
-        | Type::TraitObject(_)
-        | _ => abort!(
+        Type::ImplTrait(_) | Type::Infer(_) | Type::Macro(_) | Type::Verbatim(_) | _ => abort!(
             self_ty.span(),
             "#[ext] is not supported for this kind of type"
         ),
@@ -308,6 +305,7 @@ impl<'a> ToTokens for ExtType<'a> {
             ExtType::Slice(inner) => inner.to_tokens(tokens),
             ExtType::Tuple(inner) => inner.to_tokens(tokens),
             ExtType::BareFn(inner) => inner.to_tokens(tokens),
+            ExtType::TraitObject(inner) => inner.to_tokens(tokens),
         }
     }
 }
@@ -359,6 +357,22 @@ fn ext_trait_name(self_ty: &ExtType) -> Ident {
                     }
                     syn::ReturnType::Type(_, ty) => {
                         name = format_ident!("{}{}", name, inner_self_ty(&(&**ty).into()));
+                    }
+                }
+                name
+            }
+            ExtType::TraitObject(inner) => {
+                let mut name = format_ident!("TraitObject");
+                for bound in inner.bounds.iter() {
+                    match bound {
+                        TypeParamBound::Trait(bound) => {
+                            for segment in bound.path.segments.iter() {
+                                name = format_ident!("{}{}", name, segment.ident);
+                            }
+                        }
+                        TypeParamBound::Lifetime(lifetime) => {
+                            name = format_ident!("{}{}", name, lifetime.ident);
+                        }
                     }
                 }
                 name

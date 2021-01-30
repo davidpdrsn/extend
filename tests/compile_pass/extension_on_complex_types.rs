@@ -39,6 +39,9 @@ fn bare_fn(_: i32) -> bool {
     false
 }
 
+#[ext]
+impl dyn Send + Sync + 'static {}
+
 fn main() {
     "".foo();
 
