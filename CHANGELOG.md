@@ -6,7 +6,7 @@ for Rust libraries in [RFC #1105](https://github.com/rust-lang/rfcs/blob/master/
 
 ## Unreleased
 
-None.
+- Support extensions on bare functions types (things like `fn(i32) -> bool`).
 
 ### Breaking changes
 

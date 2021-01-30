@@ -30,6 +30,15 @@ impl (i32, i64) {
     fn foo(self) {}
 }
 
+#[ext]
+impl fn(i32) -> bool {
+    fn foo(self) {}
+}
+
+fn bare_fn(_: i32) -> bool {
+    false
+}
+
 fn main() {
     "".foo();
 
@@ -41,4 +50,6 @@ fn main() {
     &[1, 2, 3].foo();
 
     (1i32, 1i64).foo();
+
+    (bare_fn as fn(i32) -> bool).foo();
 }

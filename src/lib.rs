@@ -158,9 +158,9 @@ use syn::{
     punctuated::Punctuated,
     spanned::Spanned,
     token::{Add, Semi},
-    Ident, ImplItem, ItemImpl, Token, TraitItemConst, TraitItemMethod, Type, TypeArray, TypeGroup,
-    TypeNever, TypeParamBound, TypeParen, TypePath, TypePtr, TypeReference, TypeSlice, TypeTuple,
-    Visibility,
+    Ident, ImplItem, ItemImpl, Token, TraitItemConst, TraitItemMethod, Type, TypeArray, TypeBareFn,
+    TypeGroup, TypeNever, TypeParamBound, TypeParen, TypePath, TypePtr, TypeReference, TypeSlice,
+    TypeTuple, Visibility,
 };
 
 /// See crate docs for more info.
@@ -260,6 +260,7 @@ enum ExtType<'a> {
     Reference(&'a TypeReference),
     Slice(&'a TypeSlice),
     Tuple(&'a TypeTuple),
+    BareFn(&'a TypeBareFn),
 }
 
 #[allow(clippy::wildcard_in_or_patterns)]
@@ -274,9 +275,9 @@ fn parse_self_ty(self_ty: &Type) -> ExtType {
         Type::Reference(inner) => ExtType::Reference(inner),
         Type::Slice(inner) => ExtType::Slice(inner),
         Type::Tuple(inner) => ExtType::Tuple(inner),
+        Type::BareFn(inner) => ExtType::BareFn(inner),
 
-        Type::BareFn(_)
-        | Type::ImplTrait(_)
+        Type::ImplTrait(_)
         | Type::Infer(_)
         | Type::Macro(_)
         | Type::Verbatim(_)
@@ -306,6 +307,7 @@ impl<'a> ToTokens for ExtType<'a> {
             ExtType::Reference(inner) => inner.to_tokens(tokens),
             ExtType::Slice(inner) => inner.to_tokens(tokens),
             ExtType::Tuple(inner) => inner.to_tokens(tokens),
+            ExtType::BareFn(inner) => inner.to_tokens(tokens),
         }
     }
 }
@@ -346,6 +348,21 @@ fn ext_trait_name(self_ty: &ExtType) -> Ident {
                 name
             }
             ExtType::Never(_) => format_ident!("Never"),
+            ExtType::BareFn(inner) => {
+                let mut name = format_ident!("BareFn");
+                for input in inner.inputs.iter() {
+                    name = format_ident!("{}{}", name, inner_self_ty(&(&input.ty).into()));
+                }
+                match &inner.output {
+                    syn::ReturnType::Default => {
+                        name = format_ident!("{}Unit", name);
+                    }
+                    syn::ReturnType::Type(_, ty) => {
+                        name = format_ident!("{}{}", name, inner_self_ty(&(&**ty).into()));
+                    }
+                }
+                name
+            }
         }
     }
 
