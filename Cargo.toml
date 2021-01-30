@@ -1,6 +1,6 @@
 [package]
 name = "extend"
-version = "0.3.0"
+version = "1.0.0"
 authors = ["David Pedersen <david.pdrsn@gmail.com>"]
 edition = "2018"
 categories = ["rust-patterns"]

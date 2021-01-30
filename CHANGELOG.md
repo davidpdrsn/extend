@@ -6,12 +6,16 @@ for Rust libraries in [RFC #1105](https://github.com/rust-lang/rfcs/blob/master/
 
 ## Unreleased
 
-- Support extensions on bare functions types (things like `fn(i32) -> bool`).
-- Support extensions on trait objects (things like `dyn Send + Sync`).
+None.
 
 ### Breaking changes
 
 None.
+
+## 1.0.0 - 2021-01-30
+
+- Support extensions on bare functions types (things like `fn(i32) -> bool`).
+- Support extensions on trait objects (things like `dyn Send + Sync`).
 
 ## 0.3.0 - 2020-08-31
 
