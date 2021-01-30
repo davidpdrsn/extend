@@ -1,6 +1,9 @@
 # extend
 
-[API documentation](https://docs.rs/extend)
+[![Crates.io](https://img.shields.io/crates/v/extend.svg)](https://crates.io/crates/extend)
+[![Docs](https://docs.rs/extend/badge.svg)](https://docs.rs/extend)
+[![dependency status](https://deps.rs/repo/github/davidpdrsn/extend/status.svg)](https://deps.rs/repo/github/davidpdrsn/extend)
+[![Build status](https://github.com/davidpdrsn/extend/workflows/CI/badge.svg)](https://github.com/davidpdrsn/extend/actions)
 
 Create extensions for types you don't own with [extension traits] but without the boilerplate.
 
