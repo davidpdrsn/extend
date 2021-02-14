@@ -1,6 +1,6 @@
 [package]
 name = "extend"
-version = "1.0.0"
+version = "1.0.1"
 authors = ["David Pedersen <david.pdrsn@gmail.com>"]
 edition = "2018"
 categories = ["rust-patterns"]
@@ -25,3 +25,6 @@ async-trait = "0.1.40"
 [lib]
 proc-macro = true
 path = "src/lib.rs"
+
+[badges]
+maintenance = { status = "passively-maintained" }

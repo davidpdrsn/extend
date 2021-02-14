@@ -4,6 +4,7 @@
 [![Docs](https://docs.rs/extend/badge.svg)](https://docs.rs/extend)
 [![dependency status](https://deps.rs/repo/github/davidpdrsn/extend/status.svg)](https://deps.rs/repo/github/davidpdrsn/extend)
 [![Build status](https://github.com/davidpdrsn/extend/workflows/CI/badge.svg)](https://github.com/davidpdrsn/extend/actions)
+![maintenance-status](https://img.shields.io/badge/maintenance-passively--maintained-yellowgreen.svg)
 
 Create extensions for types you don't own with [extension traits] but without the boilerplate.
 

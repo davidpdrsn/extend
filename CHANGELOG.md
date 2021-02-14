@@ -12,6 +12,10 @@ None.
 
 None.
 
+## 1.0.1 - 2021-02-14
+
+- Update maintenance status.
+
 ## 1.0.0 - 2021-01-30
 
 - Support extensions on bare functions types (things like `fn(i32) -> bool`).
