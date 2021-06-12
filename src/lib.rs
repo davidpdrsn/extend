@@ -61,8 +61,8 @@
 //!
 //! You can configure:
 //!
-//! - The visibility of the trait. The default visibility is private. Example: `#[ext(pub)]`. This
-//! must be the first argument to the attribute.
+//! - The visibility of the trait. Use `pub impl ...` to generate `pub trait ...`. The default
+//! visibility is private.
 //! - The name of the generated extension trait. Example: `#[ext(name = MyExt)]`. By default we
 //! generate a name based on what you extend.
 //! - Which supertraits the generated extension trait should have. Default is no supertraits.
@@ -81,15 +81,15 @@
 //!     }
 //! }
 //!
-//! #[ext(pub(crate))]
-//! impl i32 {
+//! #[ext]
+//! pub(crate) impl i32 {
 //!     fn double(self) -> i32 {
 //!         self * 2
 //!     }
 //! }
 //!
-//! #[ext(pub, name = ResultSafeUnwrapExt)]
-//! impl<T> Result<T, std::convert::Infallible> {
+//! #[ext(name = ResultSafeUnwrapExt)]
+//! pub impl<T> Result<T, std::convert::Infallible> {
 //!     fn safe_unwrap(self) -> T {
 //!         match self {
 //!             Ok(t) => t,
@@ -102,6 +102,19 @@
 //! impl String {
 //!     fn my_length(self) -> usize {
 //!         self.len()
+//!     }
+//! }
+//! ```
+//!
+//! For backwards compatibility you can also declare the visibility as the first argument to `#[ext]`:
+//!
+//! ```
+//! use extend::ext;
+//!
+//! #[ext(pub)]
+//! impl i32 {
+//!     fn double(self) -> i32 {
+//!         self * 2
 //!     }
 //! }
 //! ```
@@ -163,6 +176,22 @@ use syn::{
     TypeTraitObject, TypeTuple, Visibility,
 };
 
+struct Input {
+    item_impl: ItemImpl,
+    vis: Option<Visibility>,
+}
+
+impl Parse for Input {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        let vis = input
+            .parse::<Visibility>()
+            .ok()
+            .filter(|vis| vis != &Visibility::Inherited);
+        let item_impl = input.parse()?;
+        Ok(Self { item_impl, vis })
+    }
+}
+
 /// See crate docs for more info.
 #[proc_macro_attribute]
 #[proc_macro_error]
@@ -171,8 +200,12 @@ pub fn ext(
     attr: proc_macro::TokenStream,
     item: proc_macro::TokenStream,
 ) -> proc_macro::TokenStream {
-    let item = parse_macro_input!(item as ItemImpl);
-    let config = parse_macro_input!(attr as Config);
+    let item = parse_macro_input!(item as Input);
+    let mut config = parse_macro_input!(attr as Config);
+
+    if let Some(vis) = item.vis {
+        config.visibility = vis;
+    }
 
     let ItemImpl {
         attrs,
@@ -185,7 +218,7 @@ pub fn ext(
         defaultness: _,
         impl_token: _,
         brace_token: _,
-    } = item;
+    } = item.item_impl;
 
     if let Some((_, path, _)) = trait_ {
         abort!(path.span(), "Trait impls cannot be used for #[ext]");
