@@ -204,6 +204,13 @@ pub fn ext(
     let mut config = parse_macro_input!(attr as Config);
 
     if let Some(vis) = item.vis {
+        if config.visibility != Visibility::Inherited {
+            abort!(
+                config.visibility.span(),
+                "Cannot set visibility on `#[ext]` and `impl` block"
+            );
+        }
+
         config.visibility = vis;
     }
 
