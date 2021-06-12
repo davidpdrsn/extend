@@ -8,6 +8,7 @@ for Rust libraries in [RFC #1105](https://github.com/rust-lang/rfcs/blob/master/
 
 - Support setting visibility of the generated trait directly on the `impl`
   block. For example: `pub impl i32 { ... }`.
+- Add `#[ext_sized]` for adding `Sized` supertrait.
 
 ### Breaking changes
 
