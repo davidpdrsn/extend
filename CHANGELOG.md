@@ -6,13 +6,17 @@ for Rust libraries in [RFC #1105](https://github.com/rust-lang/rfcs/blob/master/
 
 ## Unreleased
 
-- Support setting visibility of the generated trait directly on the `impl`
-  block. For example: `pub impl i32 { ... }`.
-- Add `#[ext_sized]` for adding `Sized` supertrait.
+None.
 
 ### Breaking changes
 
 None.
+
+## 1.1.0 - 2021-06-12
+
+- Support setting visibility of the generated trait directly on the `impl`
+  block. For example: `pub impl i32 { ... }`.
+- Add `#[ext_sized]` for adding `Sized` supertrait.
 
 ## 1.0.1 - 2021-02-14
 
