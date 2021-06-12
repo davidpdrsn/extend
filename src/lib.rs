@@ -160,14 +160,12 @@
     unused_imports
 )]
 
-extern crate proc_macro;
-
 use proc_macro2::TokenStream;
 use proc_macro_error::*;
 use quote::{format_ident, quote, ToTokens};
 use syn::{
     parse::{self, Parse, ParseStream},
-    parse_macro_input,
+    parse_macro_input, parse_quote,
     punctuated::Punctuated,
     spanned::Spanned,
     token::{Add, Semi},
@@ -201,8 +199,45 @@ pub fn ext(
     item: proc_macro::TokenStream,
 ) -> proc_macro::TokenStream {
     let item = parse_macro_input!(item as Input);
-    let mut config = parse_macro_input!(attr as Config);
+    let config = parse_macro_input!(attr as Config);
+    go(item, config)
+}
 
+/// Like [`ext`](macro@crate::ext) but always add `Sized` as a supertrait.
+///
+/// This is provided as a convenience for generating extension traits that require `Self: Sized`
+/// such as:
+///
+/// ```
+/// use extend::ext_sized;
+///
+/// #[ext_sized]
+/// impl i32 {
+///     fn requires_sized(self) -> Option<Self> {
+///         Some(self)
+///     }
+/// }
+/// ```
+#[proc_macro_attribute]
+#[proc_macro_error]
+#[allow(clippy::unneeded_field_pattern)]
+pub fn ext_sized(
+    attr: proc_macro::TokenStream,
+    item: proc_macro::TokenStream,
+) -> proc_macro::TokenStream {
+    let item = parse_macro_input!(item as Input);
+    let mut config: Config = parse_macro_input!(attr as Config);
+
+    config.supertraits = if let Some(supertraits) = config.supertraits.take() {
+        Some(parse_quote!(#supertraits + Sized))
+    } else {
+        Some(parse_quote!(Sized))
+    };
+
+    go(item, config)
+}
+
+fn go(item: Input, mut config: Config) -> proc_macro::TokenStream {
     if let Some(vis) = item.vis {
         if config.visibility != Visibility::Inherited {
             abort!(
