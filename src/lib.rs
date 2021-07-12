@@ -391,7 +391,11 @@ fn ext_trait_name(self_ty: &ExtType) -> Ident {
             ExtType::Path(inner) => find_and_combine_idents(inner),
             ExtType::Reference(inner) => {
                 let name = inner_self_ty(&(&*inner.elem).into());
-                format_ident!("Ref{}", name)
+                if inner.mutability.is_some() {
+                    format_ident!("RefMut{}", name)
+                } else {
+                    format_ident!("Ref{}", name)
+                }
             }
             ExtType::Array(inner) => {
                 let name = inner_self_ty(&(&*inner.elem).into());
