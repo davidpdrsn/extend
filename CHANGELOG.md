@@ -6,13 +6,17 @@ for Rust libraries in [RFC #1105](https://github.com/rust-lang/rfcs/blob/master/
 
 ## Unreleased
 
-- Fix using `pub impl` with `#[async_trait]`.
+None.
 
 ### Breaking changes
 
 None.
 
-## 1.1.1 - 2021-12-12
+## 1.1.2 - 2021-09-02
+
+- Fix using `pub impl` with `#[async_trait]`.
+
+## 1.1.1 - 2021-06-12
 
 - Fix name collision for extensions on `&T` and `&mut T`. The generated traits
   now get different names.
