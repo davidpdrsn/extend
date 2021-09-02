@@ -174,6 +174,7 @@ use syn::{
     TypeTraitObject, TypeTuple, Visibility,
 };
 
+#[derive(Debug)]
 struct Input {
     item_impl: ItemImpl,
     vis: Option<Visibility>,
@@ -181,11 +182,19 @@ struct Input {
 
 impl Parse for Input {
     fn parse(input: ParseStream) -> syn::Result<Self> {
+        let mut attributes = Vec::new();
+        if input.peek(syn::Token![#]) {
+            attributes.extend(syn::Attribute::parse_outer(input)?);
+        }
+
         let vis = input
             .parse::<Visibility>()
             .ok()
             .filter(|vis| vis != &Visibility::Inherited);
-        let item_impl = input.parse()?;
+
+        let mut item_impl = input.parse::<ItemImpl>()?;
+        item_impl.attrs.extend(attributes);
+
         Ok(Self { item_impl, vis })
     }
 }

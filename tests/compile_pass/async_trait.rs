@@ -9,4 +9,17 @@ impl String {
     }
 }
 
+#[ext]
+#[async_trait]
+pub impl i32 {
+    async fn bar() -> usize {
+        1
+    }
+}
+
+async fn foo() {
+    let _: usize = String::foo().await;
+    let _: usize = i32::bar().await;
+}
+
 fn main() {}
