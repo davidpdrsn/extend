@@ -6,11 +6,15 @@ for Rust libraries in [RFC #1105](https://github.com/rust-lang/rfcs/blob/master/
 
 ## Unreleased
 
-- Support destructuring function arguments
+- None.
 
 ### Breaking changes
 
 - None.
+
+## 1.2.0 - 2023-03-18
+
+- Support destructuring function arguments
 
 ## 1.1.3 - 2023-03-18
 
