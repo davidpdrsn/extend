@@ -6,11 +6,15 @@ for Rust libraries in [RFC #1105](https://github.com/rust-lang/rfcs/blob/master/
 
 ## Unreleased
 
-- Update to syn 2.0
+- None.
 
 ### Breaking changes
 
-None.
+- None.
+
+## 1.1.3 - 2023-03-18
+
+- Update to syn 2.0
 
 ## 1.1.2 - 2021-09-02
 
