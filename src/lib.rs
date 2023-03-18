@@ -522,7 +522,26 @@ fn extract_allowed_items(items: &[ImplItem]) -> Result<MethodsAndConsts> {
         match item {
             ImplItem::Fn(method) => acc.trait_methods.push(TraitItemFn {
                 attrs: method.attrs.clone(),
-                sig: method.sig.clone(),
+                sig: {
+                    let mut sig = method.sig.clone();
+                    sig.inputs = sig
+                        .inputs
+                        .into_iter()
+                        .map(|fn_arg| match fn_arg {
+                            syn::FnArg::Receiver(recv) => syn::FnArg::Receiver(recv),
+                            syn::FnArg::Typed(mut pat_type) => {
+                                pat_type.pat = Box::new(match *pat_type.pat {
+                                    syn::Pat::Ident(pat_ident) => syn::Pat::Ident(pat_ident),
+                                    _ => {
+                                        parse_quote!(_)
+                                    }
+                                });
+                                syn::FnArg::Typed(pat_type)
+                            }
+                        })
+                        .collect();
+                    sig
+                },
                 default: None,
                 semi_token: Some(Semi::default()),
             }),
