@@ -159,8 +159,8 @@ use syn::{
     parse_macro_input, parse_quote,
     punctuated::Punctuated,
     spanned::Spanned,
-    token::{Add, Semi},
-    Ident, ImplItem, ItemImpl, Result, Token, TraitItemConst, TraitItemMethod, Type, TypeArray,
+    token::{Plus, Semi},
+    Ident, ImplItem, ItemImpl, Result, Token, TraitItemConst, TraitItemFn, Type, TypeArray,
     TypeBareFn, TypeGroup, TypeNever, TypeParamBound, TypeParen, TypePath, TypePtr, TypeReference,
     TypeSlice, TypeTraitObject, TypeTuple, Visibility,
 };
@@ -299,7 +299,7 @@ fn go(item: Input, mut config: Config) -> Result<proc_macro::TokenStream> {
     let supertraits_quoted = if all_supertraits.is_empty() {
         quote! {}
     } else {
-        let supertraits_quoted = punctuated_from_iter::<_, _, Add>(all_supertraits);
+        let supertraits_quoted = punctuated_from_iter::<_, _, Plus>(all_supertraits);
         quote! { : #supertraits_quoted }
     };
 
@@ -466,6 +466,9 @@ fn ext_trait_name(self_ty: &ExtType) -> Result<Ident> {
                         TypeParamBound::Lifetime(lifetime) => {
                             name = format_ident!("{}{}", name, lifetime.ident);
                         }
+                        other => {
+                            return Err(syn::Error::new(other.span(), "unsupported bound"));
+                        }
                     }
                 }
                 Ok(name)
@@ -508,7 +511,7 @@ fn find_and_combine_idents(type_path: &TypePath) -> Result<Ident> {
 
 #[derive(Debug, Default)]
 struct MethodsAndConsts {
-    trait_methods: Vec<TraitItemMethod>,
+    trait_methods: Vec<TraitItemFn>,
     trait_consts: Vec<TraitItemConst>,
 }
 
@@ -517,7 +520,7 @@ fn extract_allowed_items(items: &[ImplItem]) -> Result<MethodsAndConsts> {
     let mut acc = MethodsAndConsts::default();
     for item in items {
         match item {
-            ImplItem::Method(method) => acc.trait_methods.push(TraitItemMethod {
+            ImplItem::Fn(method) => acc.trait_methods.push(TraitItemFn {
                 attrs: method.attrs.clone(),
                 sig: method.sig.clone(),
                 default: None,
@@ -525,6 +528,7 @@ fn extract_allowed_items(items: &[ImplItem]) -> Result<MethodsAndConsts> {
             }),
             ImplItem::Const(const_) => acc.trait_consts.push(TraitItemConst {
                 attrs: const_.attrs.clone(),
+                generics: const_.generics.clone(),
                 const_token: Default::default(),
                 ident: const_.ident.clone(),
                 colon_token: Default::default(),
@@ -556,7 +560,7 @@ fn extract_allowed_items(items: &[ImplItem]) -> Result<MethodsAndConsts> {
 struct Config {
     ext_trait_name: Option<Ident>,
     visibility: Visibility,
-    supertraits: Option<Punctuated<TypeParamBound, Add>>,
+    supertraits: Option<Punctuated<TypeParamBound, Plus>>,
 }
 
 impl Parse for Config {
@@ -579,7 +583,7 @@ impl Parse for Config {
                 }
                 "supertraits" => {
                     config.supertraits =
-                        Some(Punctuated::<TypeParamBound, Add>::parse_terminated(input)?);
+                        Some(Punctuated::<TypeParamBound, Plus>::parse_terminated(input)?);
                 }
                 _ => return Err(syn::Error::new(ident.span(), "Unknown configuration name")),
             }
