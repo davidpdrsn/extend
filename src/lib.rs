@@ -13,12 +13,10 @@
 //!     }
 //! }
 //!
-//! fn main() {
-//!     assert_eq!(
-//!         vec![1, 2, 3],
-//!         vec![2, 3, 1].sorted(),
-//!     );
-//! }
+//! assert_eq!(
+//!     vec![1, 2, 3],
+//!     vec![2, 3, 1].sorted(),
+//! );
 //! ```
 //!
 //! # How does it work?
@@ -150,7 +148,6 @@
 //!
 //! [extension traits]: https://dev.to/matsimitsu/extending-existing-functionality-in-rust-with-traits-in-rust-3622
 
-#![doc(html_root_url = "https://docs.rs/extend/1.1.2")]
 #![allow(clippy::let_and_return)]
 #![deny(
     unused_variables,
