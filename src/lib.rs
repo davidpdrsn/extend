@@ -154,7 +154,6 @@
 #![allow(clippy::let_and_return)]
 #![deny(
     unused_variables,
-    mutable_borrow_reservation_conflict,
     dead_code,
     unused_must_use,
     unused_imports
